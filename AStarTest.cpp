@@ -1,5 +1,12 @@
+/********************************************
+TODO:
+- make own set class with vector
+	- internal find function
+********************************************/
+
 #include <iostream>
 #include <set>
+#include <vector>
 #include <map>
 #include <list>
 #include <cmath>
@@ -21,7 +28,7 @@ int graph[GRAPH_HEIGHT][GRAPH_WIDTH] =
 
 struct Node 
 {
-	//friend bool operator<(const Node& n1, const Node& n2);
+	friend bool operator<(const Node& n1, const Node& n2);
 	friend bool operator==(const Node& n1, const Node& n2);
 	int x;
 	int y;
@@ -29,7 +36,10 @@ struct Node
 
 bool operator<(const Node& n1, const Node& n2) 
 {
-	if (n1.x <= n2.x && n1.y <= n2.y) {
+	float n1temp = sqrt((n1.x)*(n1.x) + (n1.y-(GRAPH_HEIGHT-1))*(n1.y-(GRAPH_HEIGHT-1)));
+	float n2temp = sqrt((n2.x)*(n2.x) + (n2.y-(GRAPH_HEIGHT-1))*(n2.y-(GRAPH_HEIGHT-1)));
+
+	if (n1temp < n2temp) {
 		return true;
 	}
 
@@ -47,8 +57,8 @@ bool operator==(const Node& n1, const Node& n2)
 
 bool fnequals(Node n1, Node n2) 
 {
-	float n1temp = sqrt((n1.x)*(n1.x) + (n1.y)*(n1.y));
-	float n2temp = sqrt((n2.x)*(n2.x) + (n2.y)*(n2.y));
+	float n1temp = sqrt((n1.x)*(n1.x) + (n1.y-(GRAPH_HEIGHT-1))*(n1.y-(GRAPH_HEIGHT-1)));
+	float n2temp = sqrt((n2.x)*(n2.x) + (n2.y-(GRAPH_HEIGHT-1))*(n2.y-(GRAPH_HEIGHT-1)));
 
 	if (n1temp < n2temp) {
 		return true;
@@ -130,7 +140,6 @@ list<Node> AStar(Node start, Node goal)
 
 	while (!openSet.empty()) {
 		n1 = *(openSet.begin());
-		neighbours.clear();
 
 		// check for lowest f_score among openSet
 		for (set<Node>::iterator it = openSet.begin(); it != openSet.end(); it++) {
@@ -145,18 +154,16 @@ list<Node> AStar(Node start, Node goal)
 		}
 
 		openSet.erase(n1);
-		/*set<Node>::iterator er;
-		er = openSet.find(n1);
-
-		if (er != openSet.end()) {
-			openSet.erase(er);
-		}*/
-
 		closedSet.insert(n1);
 
+		neighbours.clear();
 		populateNeighbours(n1, neighbours);
 
 		if (DEBUG) {
+			cout << "---------New Node-----------" << endl;
+			cout << "Current Node: " << endl;
+			cout << n1.x << "," << n1.y << endl;
+			cout << "-----------------------------" << endl;
 
 			cout << "Neighbours: " << endl;
 			for (list<Node>::iterator n2 = neighbours.begin(); n2 != neighbours.end(); n2++) {
@@ -203,6 +210,8 @@ list<Node> AStar(Node start, Node goal)
 		}
 	}
 
+	// failed case
+	cout << "No Path Found" << endl;
 	return path;
 }
 
