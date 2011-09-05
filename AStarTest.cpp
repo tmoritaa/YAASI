@@ -13,7 +13,6 @@ using namespace std;
 
 int DEBUG;
 
-
 int graph[GRAPH_HEIGHT][GRAPH_WIDTH] = 
 {
 	{1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -38,21 +37,17 @@ int graph[GRAPH_HEIGHT][GRAPH_WIDTH] =
 	{0, 0, 0, 0 ,0}
 };*/
 
-/*
-bool fnequals(Node n1, Node n2) 
+inline pair<int, int> nodeToPair(Node n1) 
 {
-	if (n1.x == n2.x) {
-		if (fabs(n1.y - (GRAPH_HEIGHT-1)) < fabs(n2.y - (GRAPH_HEIGHT-1))) {
-			return true;
-		} else {
-			return false;
-		}
-	} else if (n1.x < n2.x) {
-		return true;
-	} else {
-		return false;
-	}
-} */
+	return make_pair(n1.x, n1.y);
+}
+
+inline Node pairToNode(pair<int, int> p1) 
+{
+	Node n = {p1.first, p1.second};
+
+	return n;
+}
 
 void populateNeighbours(Node node, list<Node>& neighbours) 
 {
@@ -78,12 +73,12 @@ void populateNeighbours(Node node, list<Node>& neighbours)
 	}
 }
 
-inline float dist_between(Node start, Node goal) 
+inline float dist_between(Node n1, Node n2) 
 {
 	float dist = 0;
 
-	float y = fabs(start.y - goal.y);
-	float x = fabs(start.x - goal.x);
+	float x = fabs(n1.x - n2.x);
+	float y = fabs(n1.y - n2.y);
 
 	dist = sqrt(y*y + x*x);
 
@@ -92,8 +87,8 @@ inline float dist_between(Node start, Node goal)
 
 void reconstruct_path(map<pair<int, int>, Node>& parent, Node& current, list<Node>& path) 
 {
-	if (parent.find(make_pair(current.x, current.y)) != parent.end()) {
-		reconstruct_path(parent, parent[make_pair(current.x, current.y)], path);
+	if (parent.find(nodeToPair(current)) != parent.end()) {
+		reconstruct_path(parent, parent[nodeToPair(current)], path);
 	}
 
 	path.push_back(current);
@@ -121,22 +116,26 @@ list<Node> AStar(Node start, Node goal)
 	list<Node> neighbours;
 
 	// initializations
-	openSet.insert(make_pair(start.x, start.y));
+	openSet.insert(nodeToPair(start));
 
-	g_score[make_pair((start.x), (start.y))] = 0;
-	h_score[make_pair((start.x), (start.y))] = dist_between(start, goal);
-	f_score[make_pair((start.x), (start.y))] = h_score[make_pair(start.x, start.y)];
+	g_score[nodeToPair(start)] = 0;
+	h_score[nodeToPair(start)] = dist_between(start, goal);
+	f_score[nodeToPair(start)] = h_score[nodeToPair(start)];
 
 
 	while (!openSet.empty()) {
-		n1.x = (*(openSet.begin())).first;
-		n1.y = (*(openSet.begin())).second;
+		n1 = pairToNode(*(openSet.begin()));
+
+		//n1.x = (*(openSet.begin())).first;
+		//n1.y = (*(openSet.begin())).second;
 
 		// check for lowest f_score among openSet
 		for (set<pair<int, int> >::iterator it = openSet.begin(); it != openSet.end(); it++) {
-			if (f_score[make_pair((*it).first, (*it).second)] < f_score[make_pair(n1.x, n1.y)]) {
-				n1.x = (*it).first;
-				n1.y = (*it).second;
+			if (f_score[*it] < f_score[nodeToPair(n1)]) {
+				n1 = pairToNode(*it);
+
+				//n1.x = (*it).first;
+				//n1.y = (*it).second;
 			}
 		}
 
@@ -145,8 +144,8 @@ list<Node> AStar(Node start, Node goal)
 			return path;
 		}
 
-		openSet.erase(make_pair(n1.x, n1.y));
-		closedSet.insert(make_pair(n1.x, n1.y));
+		openSet.erase(nodeToPair(n1));
+		closedSet.insert(nodeToPair(n1));
 
 		neighbours.clear();
 		populateNeighbours(n1, neighbours);
@@ -179,25 +178,25 @@ list<Node> AStar(Node start, Node goal)
 		for (list<Node>::iterator n2 = neighbours.begin(); n2 != neighbours.end(); n2++) {
 			bool tentative_is_better = false;
 			
-			if (closedSet.find(make_pair((*n2).x, (*n2).y)) != closedSet.end()) {
+			if (closedSet.find(nodeToPair(*n2)) != closedSet.end()) {
 				continue;
 			}
 
-			float tentative_g_score = g_score[make_pair(n1.x, n1.y)] + dist_between(n1, *n2);
+			float tentative_g_score = g_score[nodeToPair(n1)] + dist_between(n1, *n2);
 				
-			if (openSet.find(make_pair((*n2).x, (*n2).y)) == openSet.end()) {
-				openSet.insert(make_pair((*n2).x, (*n2).y));
+			if (openSet.find(nodeToPair(*n2)) == openSet.end()) {
+				openSet.insert(nodeToPair(*n2));
 				tentative_is_better = true;
 			} 
-			else if (tentative_g_score < g_score[make_pair((*n2).x, (*n2).y)]) {
+			else if (tentative_g_score < g_score[nodeToPair(*n2)]) {
 				tentative_is_better = true;
 			}
 			
 			if (tentative_is_better) {
-				navigated[make_pair((*n2).x, (*n2).y)] = n1;
-				g_score[make_pair((*n2).x, (*n2).y)] = tentative_g_score;
-				h_score[make_pair((*n2).x, (*n2).y)] = dist_between(*n2, goal);
-				f_score[make_pair((*n2).x, (*n2).y)] = g_score[make_pair((*n2).x, (*n2).y)] + h_score[make_pair((*n2).x, (*n2).y)];
+				navigated[nodeToPair(*n2)] = n1;
+				g_score[nodeToPair(*n2)] = tentative_g_score;
+				h_score[nodeToPair(*n2)] = dist_between(*n2, goal);
+				f_score[nodeToPair(*n2)] = g_score[nodeToPair(*n2)] + h_score[nodeToPair(*n2)];
 			}
 		}
 	}
