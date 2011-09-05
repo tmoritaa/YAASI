@@ -1,9 +1,3 @@
-/********************************************
-TODO:
-- make own set class with vector
-	- internal find function
-********************************************/
-
 #include <iostream>
 #include <set>
 #include <map>
@@ -20,24 +14,28 @@ int DEBUG;
 
 int graph[GRAPH_HEIGHT][GRAPH_WIDTH] = 
 {
+	{0, 1, 0, 0, 0},
+	{1, 1, 0, 1, 1},
 	{0, 0, 0, 0, 0},
-	{0, 1, 1, 1, 0},
 	{0, 0, 0, 1, 0},
-	{0, 0, 0, 1, 0},
-	{0, 0, 0, 0, 0}
+	{0, 0, 0, 1, 0}
 };
+
 
 bool fnequals(Node n1, Node n2) 
 {
-	float n1temp = sqrt((n1.x)*(n1.x) + (n1.y-(GRAPH_HEIGHT-1))*(n1.y-(GRAPH_HEIGHT-1)));
-	float n2temp = sqrt((n2.x)*(n2.x) + (n2.y-(GRAPH_HEIGHT-1))*(n2.y-(GRAPH_HEIGHT-1)));
-
-	if (n1temp < n2temp) {
+	if (n1.x == n2.x) {
+		if (fabs(n1.y - (GRAPH_HEIGHT-1)) < fabs(n2.y - (GRAPH_HEIGHT-1))) {
+			return true;
+		} else {
+			return false;
+		}
+	} else if (n1.x < n2.x) {
 		return true;
+	} else {
+		return false;
 	}
-
-	return false;
-}
+} 
 
 void populateNeighbours(Node node, list<Node>& neighbours) 
 {
@@ -81,7 +79,7 @@ void reconstruct_path(map<Node, Node>& parent, Node& current, list<Node>& path)
 		reconstruct_path(parent, parent[current], path);
 	}
 
-	path.push_front(current);
+	path.push_back(current);
 }
 
 list<Node> AStar(Node start, Node goal) 
