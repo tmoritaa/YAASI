@@ -6,16 +6,17 @@ TODO:
 
 #include <iostream>
 #include <set>
-#include <vector>
 #include <map>
 #include <list>
 #include <cmath>
 
-int DEBUG;
-const int GRAPH_WIDTH = 5;
-const int GRAPH_HEIGHT = 5;
+#include "Node.h"
+#include "AStarTest.h"
+#include "Graph.h"
 
 using namespace std;
+
+int DEBUG;
 
 int graph[GRAPH_HEIGHT][GRAPH_WIDTH] = 
 {
@@ -25,35 +26,6 @@ int graph[GRAPH_HEIGHT][GRAPH_WIDTH] =
 	{0, 0, 0, 1, 0},
 	{0, 0, 0, 0, 0}
 };
-
-struct Node 
-{
-	friend bool operator<(const Node& n1, const Node& n2);
-	friend bool operator==(const Node& n1, const Node& n2);
-	int x;
-	int y;
-};
-
-bool operator<(const Node& n1, const Node& n2) 
-{
-	float n1temp = sqrt((n1.x)*(n1.x) + (n1.y-(GRAPH_HEIGHT-1))*(n1.y-(GRAPH_HEIGHT-1)));
-	float n2temp = sqrt((n2.x)*(n2.x) + (n2.y-(GRAPH_HEIGHT-1))*(n2.y-(GRAPH_HEIGHT-1)));
-
-	if (n1temp < n2temp) {
-		return true;
-	}
-
-	return false;
-}
-
-bool operator==(const Node& n1, const Node& n2) 
-{
-	if (n1.y == n2.y && n1.x == n2.x) {
-		return true;
-	}
-
-	return false;
-}
 
 bool fnequals(Node n1, Node n2) 
 {

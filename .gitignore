@@ -1,2 +1,5 @@
+*.o
+*.swp
+AStarTest
 a.out
 out
